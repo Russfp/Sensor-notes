@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Fastest Dinosaur</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #f59e0b;
+            --accent-hover: #d97706;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--accent);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+        }
+
+        .stat-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .content-section {
+            line-height: 1.7;
+            color: #cbd5e1;
+            margin-bottom: 28px;
+        }
+
+        .content-section h2 {
+            color: var(--text-main);
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+
+        .fact-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .fact-list li {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .fact-list li::before {
+            content: "⚡";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .runner-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab-btn {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background-color: var(--accent);
+            color: var(--bg-color);
+            border-color: var(--accent);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="badge">Speed Champion</span>
+        <h1 id="dino-name">Gallimimus</h1>
+        <p class="subtitle" id="dino-meaning">"Chicken Mimic"</p>
+    </header>
+
+    <div class="runner-selector" id="tab-container"></div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="stat-speed">50 mph</div>
+            <div class="stat-label">Estimated Top Speed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-period">Late Cretaceous</div>
+            <div class="stat-label">Time Period</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-weight">490 lbs</div>
+            <div class="stat-label">Estimated Weight</div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>Why Was It So Fast?</h2>
+        <ul class="fact-list" id="fact-list"></ul>
+    </div>
+
+    <footer>
+        <p>Speed estimates are derived from biomechanical computer modeling and fossilized trackways.</p>
+    </footer>
+</div>
+
+<script>
+    const dinosaurs = [
+        {
+            name: "Gallimimus",
+            meaning: '"Chicken Mimic"',
+            speed: "50 mph (80 km/h)",
+            period: "Late Cretaceous",
+            weight: "440–500 lbs",
+            facts: [
+                "Long tibia (lower leg bone) relative to its femur, allowing for massive stride lengths.",
+                "Hollow bones similar to modern birds, drastically reducing overall body weight.",
+                "Extremely long tail functioned as a tight counterweight, enabling high-speed maneuvers.",
+                "Ran faster than a modern racehorse and rivaled top speeds of a cheetah."
+            ]
+        },
+        {
+            name: "Struthiomimus",
+            meaning: '"Ostrich Mimic"',
+            speed: "45–50 mph (70–80 km/h)",
+            period: "Late Cretaceous",
+            weight: "330–330 lbs",
+            facts: [
+                "Physically closely resembled modern flightless birds like ostriches.",
+                "Built with a very slender torso and extremely long, lightweight limbs.",
+                "Relied purely on speed as its primary defense against apex predators like T-Rex."
+            ]
+        },
+        {
+            name: "Velociraptor",
+            meaning: '"Swift Seizer"',
+            speed: "25 mph (40 km/h)",
+            period: "Late Cretaceous",
+            weight: "30–40 lbs",
+            facts: [
+                "Capable of high acceleration in short bursts rather than sustained long runs.",
+                "Used its agility to stalk and pounce on agile prey.",
+                "Much smaller and slower than popular culture implies, but highly agile."
+            ]
+        },
+        {
+            name: "Tyrannosaurus Rex",
+            meaning: '"King of Tyrant Lizards"',
+            speed: "12–16 mph (20–25 km/h)",
+            period: "Late Cretaceous",
+            weight: "11,000+ lbs",
+            facts: [
+                "Massive size and bone stress limited it to a fast-walking stride rather than a true run.",
+                "A full-speed sprint risked catastrophic skeletal injury due to extreme weight.",
+                "Relied on ambush tactics rather than running down faster ornithomimids."
+            ]
+        }
+    ];
+
+    function renderTabs() {
+        const tabContainer = document.getElementById('tab-container');
+        dinosaurs.forEach((dino, index) => {
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+            btn.textContent = dino.name;
+            btn.onclick = () => loadDino(index);
+            tabContainer.appendChild(btn);
+        });
+    }
+
+    function loadDino(index) {
+        const dino = dinosaurs[index];
+
+        document.getElementById('dino-name').textContent = dino.name;
+        document.getElementById('dino-meaning').textContent = dino.meaning;
+        document.getElementById('stat-speed').textContent = dino.speed;
+        document.getElementById('stat-period').textContent = dino.period;
+        document.getElementById('stat-weight').textContent = dino.weight;
+
+        const factList = document.getElementById('fact-list');
+        factList.innerHTML = '';
+        dino.facts.forEach(fact => {
+            const li = document.createElement('li');
+            li.textContent = fact;
+            factList.appendChild(li);
+        });
+
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach((btn, i) => {
+            btn.classList.toggle('active', i === index);
+        });
+    }
+
+    // Initialize Page
+    renderTabs();
+    loadDino(0);
+</script>
+
+</body>
+</html>
