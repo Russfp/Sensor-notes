@@ -1,0 +1,977 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <!--
+        HTML = the structure of our website.
+        This tells the browser what kind of document this is.
+    -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Drum Machine</title>
+
+    <style>
+        /*
+        ============================================================
+        CSS
+        ============================================================
+
+        CSS controls how our HTML looks.
+
+        Think of it like:
+
+        HTML = What exists?
+        CSS  = What does it look like?
+        JS   = What does it do?
+        */
+
+        /* The entire page */
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family: Arial, sans-serif;
+
+            background: #111;
+            color: white;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Main drum machine */
+        .drum-machine {
+            width: 900px;
+            max-width: 90%;
+
+            background: #222;
+            padding: 30px;
+
+            border-radius: 15px;
+
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        /* Controls at the top */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+
+            margin-bottom: 30px;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+
+            padding: 12px 20px;
+
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #playButton {
+            background: #2ecc71;
+            color: white;
+        }
+
+        #playButton:hover {
+            background: #27ae60;
+        }
+
+        /* BPM slider */
+        input[type="range"] {
+            cursor: pointer;
+        }
+
+        /* Each drum row */
+        .drum-row {
+            display: grid;
+
+            /*
+                First column = drum name
+                Remaining columns = 16 steps
+            */
+            grid-template-columns: 100px repeat(16, 1fr);
+
+            gap: 5px;
+
+            margin-bottom: 10px;
+        }
+
+        /* Drum name */
+        .drum-name {
+            display: flex;
+            align-items: center;
+
+            font-weight: bold;
+        }
+
+        /* Individual step button */
+        .step {
+            height: 40px;
+
+            padding: 0;
+
+            background: #444;
+            color: white;
+
+            border-radius: 5px;
+        }
+
+        /* A step that the user has turned ON */
+        .step.active {
+            background: #f39c12;
+        }
+
+        /*
+            The step currently being played.
+
+            JavaScript will add this class while the
+            drum machine is running.
+        */
+        .step.playing {
+            outline: 3px solid white;
+        }
+
+        /* Help section */
+        .lesson {
+            margin-top: 30px;
+
+            background: #181818;
+
+            padding: 20px;
+
+            border-radius: 10px;
+
+            line-height: 1.6;
+        }
+
+        .lesson h2 {
+            margin-top: 0;
+        }
+
+        code {
+            background: #333;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        /* Make the drum machine easier to use on phones */
+        @media (max-width: 700px) {
+
+            .drum-machine {
+                padding: 15px;
+            }
+
+            .drum-row {
+                grid-template-columns: 70px repeat(16, 1fr);
+            }
+
+            .step {
+                height: 30px;
+            }
+
+            .drum-name {
+                font-size: 12px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!--
+    ============================================================
+    HTML
+    ============================================================
+
+    Everything inside <body> is visible on the page.
+    -->
+
+    <div class="drum-machine">
+
+        <h1>🥁 My Drum Machine</h1>
+
+        <!-- Controls -->
+        <div class="controls">
+
+            <button id="playButton">
+                ▶ Play
+            </button>
+
+            <label>
+                BPM:
+                <span id="bpmValue">120</span>
+            </label>
+
+            <input
+                type="range"
+                id="bpm"
+                min="60"
+                max="180"
+                value="120"
+            >
+
+        </div>
+
+
+        <!--
+            DRUM GRID
+
+            Each row represents an instrument.
+
+            Each button represents one step in the beat.
+
+            16 steps = 1 bar of 16th notes.
+        -->
+
+        <div class="drum-row">
+
+            <div class="drum-name">Kick</div>
+
+            <button class="step" data-drum="kick" data-step="0"></button>
+            <button class="step" data-drum="kick" data-step="1"></button>
+            <button class="step" data-drum="kick" data-step="2"></button>
+            <button class="step" data-drum="kick" data-step="3"></button>
+            <button class="step" data-drum="kick" data-step="4"></button>
+            <button class="step" data-drum="kick" data-step="5"></button>
+            <button class="step" data-drum="kick" data-step="6"></button>
+            <button class="step" data-drum="kick" data-step="7"></button>
+            <button class="step" data-drum="kick" data-step="8"></button>
+            <button class="step" data-drum="kick" data-step="9"></button>
+            <button class="step" data-drum="kick" data-step="10"></button>
+            <button class="step" data-drum="kick" data-step="11"></button>
+            <button class="step" data-drum="kick" data-step="12"></button>
+            <button class="step" data-drum="kick" data-step="13"></button>
+            <button class="step" data-drum="kick" data-step="14"></button>
+            <button class="step" data-drum="kick" data-step="15"></button>
+
+        </div>
+
+
+        <div class="drum-row">
+
+            <div class="drum-name">Snare</div>
+
+            <button class="step" data-drum="snare" data-step="0"></button>
+            <button class="step" data-drum="snare" data-step="1"></button>
+            <button class="step" data-drum="snare" data-step="2"></button>
+            <button class="step" data-drum="snare" data-step="3"></button>
+            <button class="step" data-drum="snare" data-step="4"></button>
+            <button class="step" data-drum="snare" data-step="5"></button>
+            <button class="step" data-drum="snare" data-step="6"></button>
+            <button class="step" data-drum="snare" data-step="7"></button>
+            <button class="step" data-drum="snare" data-step="8"></button>
+            <button class="step" data-drum="snare" data-step="9"></button>
+            <button class="step" data-drum="snare" data-step="10"></button>
+            <button class="step" data-drum="snare" data-step="11"></button>
+            <button class="step" data-drum="snare" data-step="12"></button>
+            <button class="step" data-drum="snare" data-step="13"></button>
+            <button class="step" data-drum="snare" data-step="14"></button>
+            <button class="step" data-drum="snare" data-step="15"></button>
+
+        </div>
+
+
+        <div class="drum-row">
+
+            <div class="drum-name">Hi-Hat</div>
+
+            <button class="step" data-drum="hihat" data-step="0"></button>
+            <button class="step" data-drum="hihat" data-step="1"></button>
+            <button class="step" data-drum="hihat" data-step="2"></button>
+            <button class="step" data-drum="hihat" data-step="3"></button>
+            <button class="step" data-drum="hihat" data-step="4"></button>
+            <button class="step" data-drum="hihat" data-step="5"></button>
+            <button class="step" data-drum="hihat" data-step="6"></button>
+            <button class="step" data-drum="hihat" data-step="7"></button>
+            <button class="step" data-drum="hihat" data-step="8"></button>
+            <button class="step" data-drum="hihat" data-step="9"></button>
+            <button class="step" data-drum="hihat" data-step="10"></button>
+            <button class="step" data-drum="hihat" data-step="11"></button>
+            <button class="step" data-drum="hihat" data-step="12"></button>
+            <button class="step" data-drum="hihat" data-step="13"></button>
+            <button class="step" data-drum="hihat" data-step="14"></button>
+            <button class="step" data-drum="hihat" data-step="15"></button>
+
+        </div>
+
+
+        <div class="drum-row">
+
+            <div class="drum-name">Clap</div>
+
+            <button class="step" data-drum="clap" data-step="0"></button>
+            <button class="step" data-drum="clap" data-step="1"></button>
+            <button class="step" data-drum="clap" data-step="2"></button>
+            <button class="step" data-drum="clap" data-step="3"></button>
+            <button class="step" data-drum="clap" data-step="4"></button>
+            <button class="step" data-drum="clap" data-step="5"></button>
+            <button class="step" data-drum="clap" data-step="6"></button>
+            <button class="step" data-drum="clap" data-step="7"></button>
+            <button class="step" data-drum="clap" data-step="8"></button>
+            <button class="step" data-drum="clap" data-step="9"></button>
+            <button class="step" data-drum="clap" data-step="10"></button>
+            <button class="step" data-drum="clap" data-step="11"></button>
+            <button class="step" data-drum="clap" data-step="12"></button>
+            <button class="step" data-drum="clap" data-step="13"></button>
+            <button class="step" data-drum="clap" data-step="14"></button>
+            <button class="step" data-drum="clap" data-step="15"></button>
+
+        </div>
+
+
+        <!-- Lesson -->
+        <div class="lesson">
+
+            <h2>📚 What You're Learning</h2>
+
+            <p>
+                <strong>HTML</strong> creates the drum machine buttons
+                and layout.
+            </p>
+
+            <p>
+                <strong>CSS</strong> controls the colors, spacing,
+                grid, buttons, and animations.
+            </p>
+
+            <p>
+                <strong>JavaScript</strong> makes the buttons interactive,
+                keeps track of the beat, controls the BPM, and creates
+                the drum sounds.
+            </p>
+
+            <p>
+                Try clicking the gray squares. Then press
+                <strong>Play</strong>.
+            </p>
+
+            <p>
+                <strong>Challenge:</strong>
+                Try changing the colors in the CSS.
+                Find <code>#f39c12</code> and replace it with another color.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        /*
+        ============================================================
+        JAVASCRIPT
+        ============================================================
+
+        JavaScript makes the website actually DO things.
+
+        We will use JavaScript to:
+
+        1. Detect button clicks
+        2. Remember which steps are active
+        3. Create drum sounds
+        4. Move through the 16 steps
+        5. Control the BPM
+        */
+
+
+        // ---------------------------------------------------------
+        // 1. GET HTML ELEMENTS
+        // ---------------------------------------------------------
+
+        /*
+            document.querySelector()
+
+            This searches the HTML and gives us an element.
+
+            For example:
+
+            <button id="playButton">
+
+            can be found using:
+
+            document.querySelector("#playButton")
+        */
+
+        const playButton = document.querySelector("#playButton");
+
+        const bpmSlider = document.querySelector("#bpm");
+
+        const bpmValue = document.querySelector("#bpmValue");
+
+        const steps = document.querySelectorAll(".step");
+
+
+        // ---------------------------------------------------------
+        // 2. OUR DRUM PATTERN
+        // ---------------------------------------------------------
+
+        /*
+            An object can store related information.
+
+            We have four drums.
+
+            Each drum has an array containing 16 values.
+
+            false = don't play
+            true  = play
+
+            Example:
+
+            kick[0] = true
+
+            means play the kick on step 1.
+        */
+
+        const pattern = {
+
+            kick: new Array(16).fill(false),
+
+            snare: new Array(16).fill(false),
+
+            hihat: new Array(16).fill(false),
+
+            clap: new Array(16).fill(false)
+
+        };
+
+
+        // ---------------------------------------------------------
+        // 3. AUDIO
+        // ---------------------------------------------------------
+
+        /*
+            The Web Audio API lets JavaScript create sounds.
+
+            We don't need MP3 files.
+
+            The browser creates the sounds for us.
+        */
+
+        let audioContext;
+
+
+        /*
+            This function creates the audio system.
+
+            We wait until the user presses Play because
+            browsers usually don't allow audio to start
+            automatically.
+        */
+
+        function startAudio() {
+
+            if (!audioContext) {
+
+                audioContext =
+                    new (window.AudioContext ||
+                    window.webkitAudioContext)();
+
+            }
+
+        }
+
+
+        // ---------------------------------------------------------
+        // 4. KICK SOUND
+        // ---------------------------------------------------------
+
+        function playKick() {
+
+            const oscillator =
+                audioContext.createOscillator();
+
+            const gain =
+                audioContext.createGain();
+
+
+            oscillator.type = "sine";
+
+            oscillator.frequency.setValueAtTime(
+                150,
+                audioContext.currentTime
+            );
+
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                50,
+                audioContext.currentTime + 0.2
+            );
+
+
+            gain.gain.setValueAtTime(
+                1,
+                audioContext.currentTime
+            );
+
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.01,
+                audioContext.currentTime + 0.2
+            );
+
+
+            oscillator.connect(gain);
+
+            gain.connect(audioContext.destination);
+
+
+            oscillator.start();
+
+            oscillator.stop(
+                audioContext.currentTime + 0.2
+            );
+
+        }
+
+
+        // ---------------------------------------------------------
+        // 5. SNARE SOUND
+        // ---------------------------------------------------------
+
+        function playSnare() {
+
+            const oscillator =
+                audioContext.createOscillator();
+
+            const gain =
+                audioContext.createGain();
+
+
+            oscillator.type = "triangle";
+
+            oscillator.frequency.value = 180;
+
+
+            gain.gain.setValueAtTime(
+                0.5,
+                audioContext.currentTime
+            );
+
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.01,
+                audioContext.currentTime + 0.15
+            );
+
+
+            oscillator.connect(gain);
+
+            gain.connect(audioContext.destination);
+
+
+            oscillator.start();
+
+            oscillator.stop(
+                audioContext.currentTime + 0.15
+            );
+
+        }
+
+
+        // ---------------------------------------------------------
+        // 6. HI-HAT SOUND
+        // ---------------------------------------------------------
+
+        function playHiHat() {
+
+            /*
+                createBuffer() gives us raw audio data.
+
+                We'll generate noise to make a hi-hat sound.
+            */
+
+            const buffer =
+                audioContext.createBuffer(
+                    1,
+                    audioContext.sampleRate * 0.05,
+                    audioContext.sampleRate
+                );
+
+
+            const data =
+                buffer.getChannelData(0);
+
+
+            for (let i = 0; i < data.length; i++) {
+
+                data[i] =
+                    Math.random() * 2 - 1;
+
+            }
+
+
+            const noise =
+                audioContext.createBufferSource();
+
+            noise.buffer = buffer;
+
+
+            const gain =
+                audioContext.createGain();
+
+
+            gain.gain.value = 0.25;
+
+
+            noise.connect(gain);
+
+            gain.connect(audioContext.destination);
+
+
+            noise.start();
+
+        }
+
+
+        // ---------------------------------------------------------
+        // 7. CLAP SOUND
+        // ---------------------------------------------------------
+
+        function playClap() {
+
+            const oscillator =
+                audioContext.createOscillator();
+
+            const gain =
+                audioContext.createGain();
+
+
+            oscillator.type = "square";
+
+            oscillator.frequency.value = 800;
+
+
+            gain.gain.setValueAtTime(
+                0.3,
+                audioContext.currentTime
+            );
+
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.01,
+                audioContext.currentTime + 0.1
+            );
+
+
+            oscillator.connect(gain);
+
+            gain.connect(audioContext.destination);
+
+
+            oscillator.start();
+
+            oscillator.stop(
+                audioContext.currentTime + 0.1
+            );
+
+        }
+
+
+        // ---------------------------------------------------------
+        // 8. PLAY A DRUM
+        // ---------------------------------------------------------
+
+        function playDrum(drum) {
+
+            if (drum === "kick") {
+
+                playKick();
+
+            }
+
+            if (drum === "snare") {
+
+                playSnare();
+
+            }
+
+            if (drum === "hihat") {
+
+                playHiHat();
+
+            }
+
+            if (drum === "clap") {
+
+                playClap();
+
+            }
+
+        }
+
+
+        // ---------------------------------------------------------
+        // 9. CLICKING A STEP
+        // ---------------------------------------------------------
+
+        /*
+            forEach() lets us perform an action on every button.
+        */
+
+        steps.forEach(function(step) {
+
+            step.addEventListener("click", function() {
+
+                /*
+                    Get information from the button.
+
+                    data-drum="kick"
+
+                    becomes:
+
+                    step.dataset.drum
+                */
+
+                const drum =
+                    step.dataset.drum;
+
+
+                const stepNumber =
+                    Number(step.dataset.step);
+
+
+                /*
+                    Change true to false
+                    or false to true.
+                */
+
+                pattern[drum][stepNumber] =
+                    !pattern[drum][stepNumber];
+
+
+                /*
+                    If the step is active,
+                    add the CSS class "active".
+                */
+
+                step.classList.toggle(
+                    "active",
+                    pattern[drum][stepNumber]
+                );
+
+
+                /*
+                    Play the sound immediately
+                    so you can preview it.
+                */
+
+                startAudio();
+
+                playDrum(drum);
+
+            });
+
+        });
+
+
+        // ---------------------------------------------------------
+        // 10. SEQUENCER
+        // ---------------------------------------------------------
+
+        let currentStep = 0;
+
+        let isPlaying = false;
+
+        let timer;
+
+
+        /*
+            This function calculates how long
+            each step should take.
+
+            BPM = Beats Per Minute
+
+            A beat contains 4 steps in our system.
+
+            Therefore:
+
+            milliseconds per step =
+            60,000 / BPM / 4
+        */
+
+        function getStepTime() {
+
+            const bpm =
+                Number(bpmSlider.value);
+
+            return 60000 / bpm / 4;
+
+        }
+
+
+        // ---------------------------------------------------------
+        // 11. PLAY THE CURRENT STEP
+        // ---------------------------------------------------------
+
+        function playStep() {
+
+            /*
+                Remove the "playing" highlight
+                from every button.
+            */
+
+            steps.forEach(function(step) {
+
+                step.classList.remove("playing");
+
+            });
+
+
+            /*
+                Find every drum that should play
+                on the current step.
+            */
+
+            for (const drum in pattern) {
+
+                if (pattern[drum][currentStep]) {
+
+                    playDrum(drum);
+
+                }
+
+            }
+
+
+            /*
+                Highlight the current column.
+            */
+
+            steps.forEach(function(step) {
+
+                if (
+                    Number(step.dataset.step)
+                    === currentStep
+                ) {
+
+                    step.classList.add("playing");
+
+                }
+
+            });
+
+
+            /*
+                Move to the next step.
+
+                % 16 makes it loop back to 0.
+            */
+
+            currentStep =
+                (currentStep + 1) % 16;
+
+        }
+
+
+        // ---------------------------------------------------------
+        // 12. START / STOP
+        // ---------------------------------------------------------
+
+        playButton.addEventListener(
+            "click",
+            function() {
+
+                startAudio();
+
+
+                if (!isPlaying) {
+
+                    isPlaying = true;
+
+                    playButton.textContent =
+                        "⏹ Stop";
+
+
+                    playStep();
+
+
+                    timer = setInterval(
+                        playStep,
+                        getStepTime()
+                    );
+
+                }
+
+                else {
+
+                    isPlaying = false;
+
+                    playButton.textContent =
+                        "▶ Play";
+
+
+                    clearInterval(timer);
+
+
+                    steps.forEach(function(step) {
+
+                        step.classList.remove(
+                            "playing"
+                        );
+
+                    });
+
+                }
+
+            }
+        );
+
+
+        // ---------------------------------------------------------
+        // 13. BPM CONTROL
+        // ---------------------------------------------------------
+
+        bpmSlider.addEventListener(
+            "input",
+            function() {
+
+                /*
+                    Update the number displayed
+                    next to BPM.
+                */
+
+                bpmValue.textContent =
+                    bpmSlider.value;
+
+
+                /*
+                    If the machine is already playing,
+                    restart the timer using the new BPM.
+                */
+
+                if (isPlaying) {
+
+                    clearInterval(timer);
+
+                    timer = setInterval(
+                        playStep,
+                        getStepTime()
+                    );
+
+                }
+
+            }
+        );
+
+
+    </script>
+
+</body>
+</html>
+```
